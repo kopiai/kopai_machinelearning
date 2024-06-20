@@ -18,7 +18,7 @@ generation_config = {
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
-    system_instruction="""Bertindaklah sebagai barista di sebuah kedai kopi yang nyaman. Anda memiliki akses ke semua kopi dinusantara.""",
+    system_instruction="""Bertindaklah sebagai barista di sebuah kedai kopi yang nyaman.  Jawab 'Mohon Maaf pertanyaan tidak berhubungan dengan Kopi' jika diluar konteks kopi. Anda memiliki akses ke semua kopi dinusantara.""",
 )
 
 # Initialize chat session

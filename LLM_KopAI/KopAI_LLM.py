@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+import PIL.Image
 import os
 from dotenv import load_dotenv
 
@@ -48,6 +49,16 @@ def generate_blend_tasting_notes(coffee1, percentage1, coffee2, percentage2):
     )
     return response.text
 
+# Function to classify roasting type
+def classify_image(image):
+    model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+    response = model.generate_content(
+        [
+            "Bertindaklah sebagai barista di sebuah kedai kopi yang nyaman. Jawab tanpa menambahkan pertanyaan baru. Jawab pertanyaan dengan pilihan Light Roast, Medium Roast, Medium-Dark Roast, dan Dark Roast. Jika gambar tidak mengandung biji kopi maka jawab dengan 'Maaf Gambar bukan termasuk Biji Kopi'. Klasifikasikan Jenis Roasting Kopi berdasarkan gambar yang dikirimkan."
+        , image]
+    )
+    return response.text
+
 # Initialize chat session
 chat_session = model.start_chat(
     history=[
@@ -67,7 +78,7 @@ st.set_page_config(page_title="Kedai Kopi Virtual Nusantara", layout="wide")
 # Sidebar for navigation
 with st.sidebar:
     st.title("Navigasi")
-    page = st.radio("Pilih halaman:", ["Fun Fact Kopi", "Deskripsi Campuran", "Obrolan Virtual"])
+    page = st.radio("Pilih halaman:", ["Fun Fact Kopi", "Deskripsi Campuran", "Obrolan Virtual", "Deteksi Roasting"])
 
 st.title("Kedai Kopi Virtual Nusantara")
 
@@ -90,6 +101,7 @@ elif page == "Deskripsi Campuran":
         st.write(tasting_notes)
 
 elif page == "Obrolan Virtual":
+    #logo = st.image(image="./logoai.jpg")
     st.header("Obrolan Virtual dengan Barista")
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -105,4 +117,23 @@ elif page == "Obrolan Virtual":
         if message["role"] == "user":
             st.chat_message("user").write(message['parts'][0])
         else:
-            st.chat_message("assistant").write(message['parts'][0])
+            st.chat_message("assistant", avatar="☕").write(message['parts'][0])
+
+elif page == "Deteksi Roasting":
+    st.header("Klasifikasi Jenis Roasting Kopi")
+    st.write("Unggah gambar biji kopi dan kami akan mengklasifikasikannya ke dalam jenis roasting: Light Roast, Medium Roast, Medium-Dark Roast, atau Dark Roast.")
+    
+    # Unggah gambar
+    uploaded_file = st.file_uploader("Unggah gambar biji kopi", type=["png", "jpg", "jpeg"])
+    
+    if uploaded_file is not None:
+        # Tampilkan gambar yang diunggah
+        image = PIL.Image.open(uploaded_file)
+        st.image(image, caption="Gambar yang diunggah", use_column_width=True)
+        
+        # Proses klasifikasi
+        st.write("Mengklasifikasikan gambar...")
+        classification = classify_image(image)
+        st.write("Hasil Klasifikasi:", classification)
+    else:
+        st.write("Harap unggah gambar biji kopi untuk diklasifikasikan.")

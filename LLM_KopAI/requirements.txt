@@ -1,3 +1,4 @@
 google-generativeai
 python-dotenv
 google-cloud-secret-manager
+Pillow
